@@ -7,7 +7,7 @@ class ADC:
 
 
 class I2C:
-    def __init__(self, channel, sda, scl, freq, *args):
+    def __init__(self, channel, sda, scl, freq=400000, timeout=50000, *args):
         pass
 
     def scan(self):
@@ -38,5 +38,33 @@ class PWM:
         pass
 
 
+class Timer:
+    ONE_SHOT = 0
+    PERIODIC = 1
+
+    def __init__(self, *, mode=1, freq=-1, period=-1, callback=None):
+        pass
+
+    def init(self, *, mode=1, freq=-1, period=-1, callback=None):
+        pass
+
+    def deinit(self):
+        pass
+
+
 def freq(_):
     pass
+
+
+class mem:
+    """
+    Fakes underlying machine registers.
+
+    Shouldn't be used directly, but any registers (e.g. mem32) can be instantiated with this
+    """
+
+    def __getitem__(self, _):
+        return 0x00
+
+
+mem32 = mem()

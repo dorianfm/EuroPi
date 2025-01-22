@@ -17,6 +17,8 @@ from europi import (
     k1,
     k2,
     oled,
+    europi_config,
+    thermometer,
 )
 from europi_script import EuroPiScript
 import configuration
@@ -34,13 +36,10 @@ is exercised.
 - cvX: output a constant voltage, one of [0, 0.5, 1, 2.5, 5, 10]
 """
 
-TEMP_CONV_FACTOR = 3.3 / 65535
-
 
 class Diagnostic(EuroPiScript):
     def __init__(self):
         super().__init__()
-        self.temp_sensor = ADC(4)
         self.voltages = [
             0,  # min
             0.5,  # not 0 but still below DI's threshold
@@ -49,16 +48,18 @@ class Diagnostic(EuroPiScript):
             5,
             10,  # max
         ]
-        self.temp_units = self.config["temp_units"]
+        self.temp_units = self.config.TEMP_UNITS
         self.use_fahrenheit = self.temp_units == "F"
 
     @classmethod
     def config_points(cls):
-        return [configuration.choice(name="temp_units", choices=["C", "F"], default="C")]
+        return [configuration.choice(name="TEMP_UNITS", choices=["C", "F"], default="C")]
 
     def calc_temp(self):
-        # see the pico's datasheet for the details of this calculation
-        t = 27 - ((self.temp_sensor.read_u16() * TEMP_CONV_FACTOR) - 0.706) / 0.001721
+        t = thermometer.read_temperature()
+        if t is None:
+            return 0
+
         if self.use_fahrenheit:
             t = (t * 1.8) + 32
         return t
@@ -89,7 +90,7 @@ class Diagnostic(EuroPiScript):
             formatted_temp = f"{int(t)}{self.temp_units}"
 
             # display the input values
-            oled.text(f"ain: {ain.read_voltage():5.2f}v {formatted_temp}", 2, 3, 1)
+            oled.text(f"ain: {ain.read_voltage(samples=512):5.2f}v {formatted_temp}", 2, 3, 1)
             oled.text(f"k1: {k1.read_position():2}  k2: {k2.read_position():2}", 2, 13, 1)
             oled.text(f"din:{din.value()} b1:{b1.value()} b2:{b2.value()}", 2, 23, 1)
 
