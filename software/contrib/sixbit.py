@@ -71,7 +71,7 @@ class SixBit(EuroPiScript):
 
         @din.handler_falling
         def gate_off():
-            all_off()
+            turn_off_all_cvs()
             self.sampled = False
 
 
@@ -100,11 +100,6 @@ class SixBit(EuroPiScript):
             self.current_binary = '{:0>{w}}'.format(binary, w=6)
             set_binary(self.current_binary)
             
-            
-        def all_off():
-            for idx in range(6):
-                cvs[idx].off()    
-
 
         def set_binary(binary):
             bits = enumerate(binary)
